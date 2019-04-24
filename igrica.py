@@ -3,6 +3,8 @@ import tkinter as tk
 import os
 import random
 import time
+from tkinter.font import Font
+
 #!!! ne radi nam ako neko klikne na isto dugme vise putaa
 #1) staviti sliku kao pozadinu na frejmu f_one_player
 #2) dodati labele za rezultate
@@ -16,7 +18,7 @@ pom_j=-1
 
 class MatrixOfButtons:
     #master je root
-    def __init__(self,master,frame,n):
+    def __init__(self,master,frame,n,photo_num):
         #self=root a frame=f_one_player
         self.b=[[0 for x in range(0,n)] for x in range(0,n)] #matrica dugmica
 
@@ -50,25 +52,25 @@ class MatrixOfButtons:
             for j in range(0,n):
                 #path=os.path.join(photo_matrix[i][j])
                 #path=os.path.join("slike1\\nesto.png")
-                photo=PhotoImage(file="slike1\\nesto.png")#slika kartica
+                photo=PhotoImage(file="slike1\\"+str(photo_num)+".gif")#slika kartica
                 photo1=PhotoImage(file=photo_matrix[0][0])
                 #???????????????????
                 #da li stavljati u ove nove frejmove??
                 #self.frames[i][j]=Frame(frame)
                 #self.b[i][j].pack(fill='both',anchor='center',expand=True)
 
-                self.b[i][j] = Button(frame,image=photo,text = str(i)+''+str(j),command=lambda x1=i, y1=j,matrica=photo_matrix,frame=frame: self.funkcija(x1,y1,matrica,frame))
+                self.b[i][j] = Button(frame,image=photo,text = str(i)+''+str(j),command=lambda x1=i, y1=j,matrica=photo_matrix,frame=frame,card_photo=photo: self.funkcija(x1,y1,matrica,frame,card_photo))
                 self.b[i][j].image=photo #*
                 self.b[i][j].grid(row = i,column = j,sticky='nsew')
                 
         rezultat=Label(frame, text='labela').grid(column = n+5,row =0)    
         
                        
-    def funkcija(self,i,j,photo_matrix,frame):
+    def funkcija(self,i,j,photo_matrix,frame,card_photo):
         #print (str(i))
         global pom_i,pom_j
         
-        if pom_i!=i or pom_j!=j:
+        if pom_i!=i or pom_j!=j: #da ne bi nastao problem ako neko klikne dva puta na isto dugme
         
             global brojac
             brojac=brojac+1
@@ -83,8 +85,7 @@ class MatrixOfButtons:
                 if photo_matrix[i][j]==photo_matrix[pom_i][pom_j]:
                     print ("nakns")#"sklanjaju se"
                 else:
-                    photo1=PhotoImage(file="slike1\\nesto.png")
-                    frame.after(700, lambda: promeni(self,photo1))
+                    frame.after(700, lambda: promeni(self,card_photo))
                     #self.b[i][j].config(image=photo1)
             else:
                 pom_i=i
@@ -94,8 +95,8 @@ class MatrixOfButtons:
             def promeni(self,photo):
                 self.b[i][j].config(image=photo)
                 self.b[i][j].image=photo
-                self.b[pom_i][pom_j].config(image=photo1)
-                self.b[pom_i][pom_j].image=photo1
+                self.b[pom_i][pom_j].config(image=card_photo)
+                self.b[pom_i][pom_j].image=card_photo
 
 def raise_frame(frame):
     frame.tkraise()
@@ -106,7 +107,7 @@ def sel(f_start):
         print("1 vs rac")
         f_start.destroy()
         raise_frame(f_one_player)
-        m = MatrixOfButtons(root,f_one_player,var3.get())
+        m = MatrixOfButtons(root,f_one_player,var3.get(),var2.get())
     else:
         print("1 vs 1")
         raise_frame(f_two_players)
@@ -120,17 +121,17 @@ class MainGUI:
         #cemu ovo sluzi??
         #self.f_start.columnconfigure(1, weight=1)
         #self.f_start.rowconfigure(1, weight=1)
-       
-        Label(self.f_start, text='Izaberite opciju:').grid(column = 1,row =1)    
+        myFont = Font(family="Segoe Print", size=14)
+        label=Label(self.f_start, text='Izaberite opciju:', font=myFont).grid(column = 1,row =1)    
         rb1=tk.Radiobutton(self.f_start, text="1 vs rac", variable=var1, value=1,indicatoron=0).grid(column = 1,row =2)
         rb2=tk.Radiobutton(self.f_start, text="1 vs 1", variable=var1, value=2,indicatoron=0).grid(column =2,row =2)
-
-        Label(self.f_start, text='Izaberite kartice:').grid(column = 1,row =3)
+        
+        Label(self.f_start, text='Izaberite kartice:',font=myFont).grid(column = 1,row =3)
         tk.Radiobutton(self.f_start,image = photo, text="opcija 1", variable=var2, value=1,indicatoron = 0).grid(column =1,row =4)
         tk.Radiobutton(self.f_start,image = photo2, text="opcija 2", variable=var2, value=2,indicatoron = 0).grid(column =2,row =4)
         tk.Radiobutton(self.f_start,image = photo3 ,text="opcija 3", variable=var2, value=3,indicatoron = 0).grid(column =3,row =4)
 
-        Label(self.f_start, text='Koliko kartica zelite?').grid(column = 1,row =5)
+        Label(self.f_start, text='Koliko kartica zelite?',font=myFont).grid(column = 1,row =5)
         #prosledjujemo pocetni frejm (f_start)
         tk.Radiobutton(self.f_start, text="4x4", variable=var3, value=4,command=lambda frame=self.f_start: sel(frame),indicatoron = 0).grid(column =1,row =6)
         tk.Radiobutton(self.f_start, text="8x8", variable=var3, value=8,command=lambda frame=self.f_start: sel(frame),indicatoron = 0).grid(column =2,row =6)
