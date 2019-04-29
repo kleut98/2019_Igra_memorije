@@ -5,12 +5,10 @@ import random
 import time
 from tkinter.font import Font
 
-#!!! ne radi nam ako neko klikne na isto dugme vise putaa
 #1) staviti sliku kao pozadinu na frejmu f_one_player
-#2) dodati labele za rezultate
-#3) napraviti kada se otkriju dve slike da se proveri da li su iste ili razlicite....
-#4) kada nema vise slika-dugme za igrati ponovo/glavni meni??
-#5) 
+#2) dodati labele za rezultate i labelu gde pise npr "prvi igrac na potezu..." i slicno
+#3) kada nema vise slika-dugme za igrati ponovo/glavni meni??
+#4) 
 
 brojac=0
 pom_i=-1
@@ -58,45 +56,65 @@ class MatrixOfButtons:
                 #da li stavljati u ove nove frejmove??
                 #self.frames[i][j]=Frame(frame)
                 #self.b[i][j].pack(fill='both',anchor='center',expand=True)
-
-                self.b[i][j] = Button(frame,image=photo,text = str(i)+''+str(j),command=lambda x1=i, y1=j,matrica=photo_matrix,frame=frame,card_photo=photo: self.funkcija(x1,y1,matrica,frame,card_photo))
+                
+                self.b[i][j] = Button(frame,image=photo,text = str(i)+''+str(j),command=lambda x1=i, y1=j,
+                                      matrica=photo_matrix,frame=frame,card_photo=photo: self.funkcija(x1,y1,matrica,frame,card_photo))
                 self.b[i][j].image=photo #*
                 self.b[i][j].grid(row = i,column = j,sticky='nsew')
-                
+        card_photo=photo
         rezultat=Label(frame, text='labela').grid(column = n+5,row =0)    
         
                        
-    def funkcija(self,i,j,photo_matrix,frame,card_photo):
+    def funkcija(self,i,j,photo_matrix,frame,card_photo): 
         #print (str(i))
+        
+        def vrati(self,photo,i,j,pom_i,pom_j): #zatvara karticu
+            self.b[i][j].config(image=photo)
+            self.b[i][j].image=photo
+            self.b[pom_i][pom_j].config(image=card_photo)
+            self.b[pom_i][pom_j].image=card_photo
+
+        def computer_playing(self,frame,photo_matrix):
+            #------TREBA POSTAVITI DA NE OTVARA KARTICE KOJE SU VEC OTVORENE(UPARENE)!---------
+            i1=random.randint(0,3) #od 0 do n treba!!
+            j1=random.randint(0,3) #od 0 do n treba!!
+            okreni_karticu(self,i1,j1)
+            i2=random.randint(0,3) #od 0 do n treba!!
+            j2=random.randint(0,3) #od 0 do n treba!!
+            frame.after(500, lambda: okreni_karticu(self,i2,j2))
+            
+            if photo_matrix[i1][j1]==photo_matrix[i2][j2]:
+                print ("nakns")#"sklanjaju se", nama za sada ostaju samo otvorene
+                computer_playing(self,frame,photo_matrix)
+            else:
+                frame.after(1000, lambda: vrati(self,card_photo,i1,j1,i2,j2))
+                    
+        def okreni_karticu(self,i,j): #prikazuje sta se nalazi na kartici
+            photo=PhotoImage(file=photo_matrix[i][j])
+            self.b[i][j].config(image=photo)
+            #moramo ponovo da postavimo sliku zbog sakupljaca otpadaka, jer ga on pokupi u suprotnom*
+            self.b[i][j].image=photo
+            
         global pom_i,pom_j
         
         if pom_i!=i or pom_j!=j: #da ne bi nastao problem ako neko klikne dva puta na isto dugme
         
             global brojac
             brojac=brojac+1
-        
-            photo=PhotoImage(file=photo_matrix[i][j])
-            self.b[i][j].config(image=photo)
-
-            #moramo ponovo da postavimo sliku zbog sakupljaca otpadaka, jer ga on pokupi u suprotnom*
-            self.b[i][j].image=photo
+            okreni_karticu(self,i,j)
         
             if brojac%2==0:
                 if photo_matrix[i][j]==photo_matrix[pom_i][pom_j]:
-                    print ("nakns")#"sklanjaju se"
+                    print ("nakns")#"sklanjaju se", nama za sada ostaju samo otvorene # self.b[i][j].destroy()
+                    #korisnik igra opet
                 else:
-                    frame.after(700, lambda: promeni(self,card_photo))
-                    #self.b[i][j].config(image=photo1)
+                    frame.after(700, lambda: vrati(self,card_photo,i,j,pom_i,pom_j))
+                    #kompjuter igra..
+                    frame.after(700, lambda: computer_playing(self,frame,photo_matrix))                    
             else:
                 pom_i=i
-                pom_j=j   
-       # self.b[i][j].destroy()
-    
-            def promeni(self,photo):
-                self.b[i][j].config(image=photo)
-                self.b[i][j].image=photo
-                self.b[pom_i][pom_j].config(image=card_photo)
-                self.b[pom_i][pom_j].image=card_photo
+                pom_j=j     
+              
 
 def raise_frame(frame):
     frame.tkraise()
@@ -142,7 +160,7 @@ class MainGUI:
 
 root = Tk()
 root.title('Memory game')
-root.geometry('800x600') # Size 200, 200
+root.geometry('800x600') # Size 800,600
 
 f_one_player = Frame(root)
 f_two_players = Frame(root)
