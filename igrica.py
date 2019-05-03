@@ -97,6 +97,7 @@ class MatrixOfButtons:
         photo_second = PhotoImage(file=paths)
 
         def open_card(self,i,j): #prikazuje sta se nalazi na kartici
+
             global opened
             photo=PhotoImage(file=self.photo_matrix[i][j])
             self.b[i][j].config(image=photo)
