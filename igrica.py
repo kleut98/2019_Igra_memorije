@@ -33,7 +33,7 @@ class MatrixOfButtons:
     def __init__(self,master,frame,n,f_start,var1):
         #self=root a frame=f_one_player
         #valjda je master root?
-        
+        n=2
         #formiramo listu nonmatched:
         global nonmatched
         for i in range(0,n):
@@ -142,9 +142,8 @@ class MatrixOfButtons:
                 open_random_cards(self)
             else:
                 for pair in opened:
-                    opened.remove(pair) #skanjamo par pair iz opened da bismo videli da li postoji jos neki par sa istom slikom
+                    opened.remove(pair) #sklanjamo par pair iz opened da bismo videli da li postoji jos neki par sa istom slikom
                     if find_same(self,pair):
-                        opened.append(pair)
                         pair1 = pair
                         (i1,j1) = pair1
                         open_card(self,i1,j1)
@@ -215,6 +214,10 @@ class MatrixOfButtons:
             global nonmatched,opened
             global pair1,pair2
             global done
+            
+            f_start.rb1.deselect()
+            f_start.rb2.deselect()
+            
             count=0
             pom_i=-1
             pom_j=-1
@@ -242,6 +245,8 @@ class MatrixOfButtons:
                 msg=messagebox.askyesno("Qustion",text)
                 if msg==True:
                     defaults()
+                    f_start.rb1.configure(variable=var1, value=1)
+                    f_start.rb2.configure(variable=var1, value=2)
                     MainGUI(root,photo,photo2,photo3,var1,var2,var3)
                 else:
                     exit()
@@ -285,7 +290,8 @@ class MatrixOfButtons:
                     if player == 1:
                         player = 2 #promenimo ko je na redu da igra
                         frame.after(700, lambda: change_of_player(self,"PLAVI"))
-                        if var1 ==1: # u ovo ulazi samo ako smo uzeli opciju 1 vs rac (onda nam je racunar ustvari plavi igrac)
+
+                        if var1.get() ==1: # u ovo ulazi samo ako smo uzeli opciju 1 vs rac (onda nam je racunar ustvari plavi igrac)
                             frame.after(750, lambda: computer_playing(self,frame,photo_second,card_photo))
                         frame.after(700, lambda: enable_buttons(self,n))                 
                     else:
@@ -309,14 +315,15 @@ def sel(f_start):
     if var1.get()==1:
         print("1 vs rac")
         raise_frame(f_one_player)
-        m = MatrixOfButtons(root,f_one_player,var3.get(),f_start,var1.get())
+        m = MatrixOfButtons(root,f_one_player,var3.get(),f_start,var1)
     else:
+        print (var1.get())
         print("1 vs 1")
         raise_frame(f_two_players)
-        m = MatrixOfButtons(root,f_two_players,var3.get(),f_start,var1.get())
+        m = MatrixOfButtons(root,f_two_players,var3.get(),f_start,var1)
 
 class MainGUI:
-    def __init__(self, master,photo1,photo2,photo3,var1,var2,var3):
+    def __init__(self,master,photo1,photo2,photo3,var1,var2,var3):
         self.f_start = Frame(master,background='LightSteelBlue2',padx=60,pady=60)
         self.f_start.grid(column=1, row=1)
 
@@ -324,8 +331,10 @@ class MainGUI:
         myFontBtn = Font(family="Segoe Print", size=11)
         
         label=Label(self.f_start, text='Izaberite opciju:', font=myFont,background='LightSkyBlue2').grid(column = 1,row =1)    
-        rb1=tk.Radiobutton(self.f_start, text="1 vs rac", variable=var1, value=1,indicatoron=0,cursor='heart',bg='LightCyan2',fg='navy',font=myFontBtn).grid(column = 1,row =2)
-        rb2=tk.Radiobutton(self.f_start, text="1 vs 1", variable=var1, value=2,indicatoron=0,cursor='heart',bg='LightCyan2',fg='navy',font=myFontBtn).grid(column =2,row =2)
+        self.f_start.rb1=tk.Radiobutton(self.f_start, text="1 vs rac", variable=var1, value=1,indicatoron=0,cursor='heart',bg='LightCyan2',fg='navy',font=myFontBtn)
+        self.f_start.rb1.grid(column = 1,row =2)
+        self.f_start.rb2=tk.Radiobutton(self.f_start, text="1 vs 1", variable=var1, value=2,indicatoron=0,cursor='heart',bg='LightCyan2',fg='navy',font=myFontBtn)
+        self.f_start.rb2.grid(column =2,row =2)
         
         Label(self.f_start, text='Izaberite kartice:',font=myFont,background='LightSkyBlue2').grid(column = 1,row =3)
         tk.Radiobutton(self.f_start,image = photo, text="opcija 1", variable=var2, value=1,indicatoron = 0,cursor='heart').grid(column =1,row =4)
@@ -362,7 +371,6 @@ fileMenu.add_command(label="Izadji",command=exit)
 menubar.add_cascade(label="File", menu=fileMenu)
 menubar.add_cascade(label="Help", menu=helpMenu)
 
-
 f_one_player = Frame(root,background='LightSteelBlue2')
 f_two_players = Frame(root,background='LightSteelBlue2')
 f_one_player.grid(row=1, column=1,sticky="nsew",padx=20,pady=20)
@@ -377,6 +385,8 @@ photo3 = PhotoImage(file = path3)
 var1 = IntVar()
 var2 = IntVar()
 var3 = IntVar()
+
 MainGUI(root,photo,photo2,photo3,var1,var2,var3)
+
 root.mainloop()
 
