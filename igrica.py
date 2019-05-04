@@ -135,7 +135,7 @@ class MatrixOfButtons:
             open_card(self,i1,j1)
             
             opened.remove(pair1) #sklanjamo par pair1 iz opened da bismo videli da li postoji jos neki par sa istom slikom
-            if find_same(self,pair1) and ifThen():
+            if find_same(self,pair1):
                 (i2,j2) = pair2
                 frame.after(500, lambda: open_card(self,i2,j2))
             else:
@@ -146,7 +146,7 @@ class MatrixOfButtons:
                 nonmatched.append(pair1)
             opened.append(pair1)
 
-        def ifThen():
+        def conditions():
             if (self.level == 1 and self.n ==4 and comp_steps%4==0) or (self.level == 1 and self.n ==6 and comp_steps%6==0) or (self.level == 1 and self.n ==8 and comp_steps%8==0):
                 return True
             elif (self.level == 2 and self.n ==4 and comp_steps%3==0) or (self.level == 2 and self.n ==6 and comp_steps%4==0) or (self.level == 2 and self.n ==8 and comp_steps%5==0):
@@ -218,7 +218,7 @@ class MatrixOfButtons:
                 return False
 
                 
-            if ifThen():
+            if conditions():
                 open_same_cards_in_opened(self)
             else:
                 open_random_cards(self)
