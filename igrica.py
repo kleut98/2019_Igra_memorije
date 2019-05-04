@@ -170,20 +170,18 @@ class MatrixOfButtons:
             global opened
             global pair1,pair2
             
-            if len(opened) < 2:
-                open_random_card(self) #ispravka je ovde 
-            else:
-                for pair in opened:
-                    opened.remove(pair) #sklanjamo par pair iz opened da bismo videli da li postoji jos neki par sa istom slikom
-                    if find_same(self,pair):
-                        pair1 = pair
-                        (i1,j1) = pair1
-                        open_card(self,i1,j1)
-                        (i2,j2) = pair2
-                        frame.after(500, lambda: open_card(self,i2,j2))
-                        return
-                    opened.append(pair)
-                open_random_card(self) #ako nije nasao 2 iste u opened,onda otvara dalje po "randomu"
+        
+            for pair in opened:
+                opened.remove(pair) #sklanjamo par pair iz opened da bismo videli da li postoji jos neki par sa istom slikom
+                if find_same(self,pair):
+                    pair1 = pair
+                    (i1,j1) = pair1
+                    open_card(self,i1,j1)
+                    (i2,j2) = pair2
+                    frame.after(500, lambda: open_card(self,i2,j2))
+                    return
+                opened.append(pair)
+            open_random_card(self) #ako nije nasao 2 iste u opened,onda otvara dalje po "randomu"
 
     
         def change(photo,i,j):
@@ -218,7 +216,12 @@ class MatrixOfButtons:
                 frame.after(1200,lambda : winner(points_b,points_y,frame))
                 done = 1
                 return False
-            open_same_cards_in_opened(self)
+
+                
+            if ifThen():
+                open_same_cards_in_opened(self)
+            else:
+                open_random_cards(self)
             (i1,j1) = pair1
             (i2,j2) = pair2
             if self.photo_matrix[i1][j1]==self.photo_matrix[i2][j2]:
