@@ -32,15 +32,16 @@ opened = [] #pamtimo sve kartice koje smo otvorili do nekog trenutka(treba nam z
 
 class MatrixOfButtons:
     #master je root
-    def __init__(self,master,f_start,var1,var2,var3):
+    def __init__(self,master,f_start,f_nivoi,var1,var2,var3):
         #self=root a frame=f_one_player
         #valjda je master root?
         f_start.grid_forget()
-
+        
         self.frame = Frame(master)
         self.frame.grid(row=1, column=1,sticky="nsew")
         self.n = var3.get()
-        self.level = var2.get()
+        if var1.get()==1:
+            self.level = var2.get()
         #formiramo listu nonmatched:
         global nonmatched
         for i in range(0,self.n):
@@ -98,7 +99,7 @@ class MatrixOfButtons:
                     path = os.path.join(Path().absolute(),"slike3/blank.gif")
                     photo=PhotoImage(file=path)#slika kartica
                     self.b[i][j] = tk.Button(canvas,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,n=self.n,frame=self.frame,card_photo=photo,f_start=
-                                          f_start,var1=var1,var2=var2,var3=var3: self.funkcija(x1,y1,n,frame,card_photo,f_start,var1,var2,var3)) #***
+                                          f_start,f_nivoi=f_nivoi,var1=var1,var2=var2,var3=var3: self.funkcija(x1,y1,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3)) #***
                     self.b[i][j].image=photo #*
                     canvas.create_window(x,y,
                                         window=self.b[i][j])
@@ -115,7 +116,7 @@ class MatrixOfButtons:
             canvas.create_window(x+75,50,
                                         window=self.points_blue)
 
-    def funkcija(self,i,j,n,frame,card_photo,f_start,var1,var2,var3):
+    def funkcija(self,i,j,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3):
                 global pom_i,pom_j
                 global player
                 global points_b,points_y
@@ -241,7 +242,6 @@ class MatrixOfButtons:
                         frame.after(1200,lambda : winner(points_b,points_y,frame))
                         done = 1
                         return False
-
                         
                     if conditions():
                         open_same_cards_in_opened(self)
@@ -278,9 +278,9 @@ class MatrixOfButtons:
                     
                     f_start.rb1.deselect()
                     f_start.rb2.deselect()
-                    f_start.rb3.deselect()
-                    f_start.rb4.deselect()
-                    f_start.rb5.deselect()
+                    f_nivoi.rb3.deselect()
+                    f_nivoi.rb4.deselect()
+                    f_nivoi.rb5.deselect()
                     f_start.rb6.deselect()
                     f_start.rb7.deselect()
                     f_start.rb8.deselect()
@@ -316,9 +316,9 @@ class MatrixOfButtons:
                             defaults()
                             f_start.rb1.configure(variable=var1, value=1)
                             f_start.rb2.configure(variable=var1, value=2)
-                            f_start.rb3.configure(variable=var2, value=1)
-                            f_start.rb4.configure(variable=var2, value=2)
-                            f_start.rb5.configure(variable=var2, value=3)
+                            f_nivoi.rb3.configure(variable=var2, value=1)
+                            f_nivoi.rb4.configure(variable=var2, value=2)
+                            f_nivoi.rb5.configure(variable=var2, value=3)
                             f_start.rb6.configure(variable=var3, value=4)
                             f_start.rb7.configure(variable=var3, value=6)
                             f_start.rb8.configure(variable=var3, value=8)
@@ -385,12 +385,9 @@ class MatrixOfButtons:
 def raise_frame(frame):
     frame.tkraise()
     
-def nivoi(self,f_start):
+def nivoi(self,f_start,f_nivoi):
     f_start.grid_forget()
 
-    f_nivoi = Frame(root)
-    f_nivoi.grid(column =1,row = 1)
-     
     imgpath = 'nivo_pic.png'
     img = Image.open(imgpath)
     self.photo_background = ImageTk.PhotoImage(img)
@@ -404,22 +401,28 @@ def nivoi(self,f_start):
                 
     label = tk.Label(canvas,text='Izaberite tezinu:', font=myFont)   
     canvas.create_window(626, 100-60,window=label)
-    f_nivoi.rb3 = tk.Radiobutton(canvas,text="najlaksi nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: play(frame))
+    f_nivoi.rb3 = tk.Radiobutton(canvas,text="najlaksi nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_nivoi: play(frame1,frame2))
     canvas.create_window(626, 130-60,width=150, height=30,window=f_nivoi.rb3)
-    f_nivoi.rb4 = tk.Radiobutton(canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: play(frame))
+    f_nivoi.rb4 = tk.Radiobutton(canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_nivoi: play(frame1,frame2))
     canvas.create_window(626, 165-60,width=150, height=30,window=f_nivoi.rb4)
-    f_nivoi.rb5 = tk.Radiobutton(canvas,text="najtezi nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: play(frame))
+    f_nivoi.rb5 = tk.Radiobutton(canvas,text="najtezi nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_nivoi: play(frame1,frame2))
     canvas.create_window(626, 200-60,width=150, height=30,window=f_nivoi.rb5)
 
-def play(f_start):
-    m = MatrixOfButtons(root,f_start,var1,var2,var3)
+def play(f_start,f_nivoi):
+    f_nivoi.grid_forget()
+    m = MatrixOfButtons(root,f_start,f_nivoi,var1,var2,var3)
     
-def sel(self,f_start):    
+def sel(self,f_start):
+    f_nivoi = Frame(root)
+    f_nivoi.grid(column =1,row = 1)
     if var1.get()==1:
         #otvaramo novi frame sa nivoima u kom ce se kada korisnik izabere nivo pokrenuti play
-        nivoi(self,f_start)
+        nivoi(self,f_start,f_nivoi)
     else:
-        play(f_start);
+        nivoi(self,f_start,f_nivoi)
+        f_nivoi.grid_forget()
+        play(f_start,f_nivoi)
+        
         
 class MainGUI:
     def __init__(self,master,var1,var2,var3):
