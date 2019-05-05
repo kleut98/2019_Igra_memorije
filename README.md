@@ -11,19 +11,20 @@ Biblioteke: random, tkinter, PIL
 Pokretanje igrice će biti moguće na Linux-u i Windows-u uz instaliranje biblioteka tkinter i PIL.  
 
 Linux instalacija:
-1) Za tkinter:  
+
 Otvoriti terminal i pokrenuti narednu komandu:
-`sudo apt-get install python3-tk`   
+
+1) Za tkinter:  `sudo apt-get install python3-tk`   
 
 2) Za PIL:
 
-Windows instalacija:  
-1) Za tkinter:
+Windows instalacija: 
+
 Otvoriti command prompt u "Run as Administrator" modu i pokrenuti narednu komandu:   
-`pip install python-tk`
 
-2) Za PIL:
-`pip install Pillow`
+1) Za tkinter: `pip install python-tk`
+
+2) Za PIL: `pip install Pillow`
 
 ## Autori
 Anja Velicković, kontakt:28anja@live.com  
