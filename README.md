@@ -16,7 +16,7 @@ Otvoriti terminal i pokrenuti narednu komandu:
 
 1) Za tkinter:  `sudo apt-get install python3-tk`   
 
-2) Za PIL:
+2) Za PIL: `sudo apt-get install python3-pil`
 
 Windows instalacija: 
 
