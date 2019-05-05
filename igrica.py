@@ -72,20 +72,17 @@ class MatrixOfButtons:
             self.photo_matrix[pair[0]][pair[1]]=path
             self.photo_matrix[pair1[0]][pair1[1]]=path
                 
-
             if self.n == 4:
-                w = 800
-                h = 600
+                w = master.winfo_screenwidth()/1.3
+                h = master.winfo_screenheight()/1.3
             elif self.n == 6:
                 w = 1000
                 h = 800
             else:
                 w = 1200
                 h = 1000
-
             
-            canvas = Canvas(self.frame,width= w,height =h,background = 'turquoise')
-            
+            canvas = Canvas(self.frame,width= w,height =h,background = 'turquoise')           
             canvas.grid(column =1,row=1)
             
             myFont = Font(family="Courier", size=14)
@@ -383,24 +380,47 @@ class MatrixOfButtons:
                         pom_j=j  
                 
                 if points_b + points_y == n*n/2 and done==0: #ako je done=1 onda smo presli na f_end u fji computer_playing
-                    frame.after(1200,lambda : winner(points_b,points_y,frame))
-        
-                   
-    
-        
-        
+                    frame.after(1200,lambda : winner(points_b,points_y,frame))               
+          
 def raise_frame(frame):
     frame.tkraise()
+    
+def nivoi(self,f_start):
+    f_start.grid_forget()
 
-def sel(f_start):    
+    f_nivoi = Frame(root)
+    f_nivoi.grid(column =1,row = 1)
+     
+    imgpath = 'nivo_pic.png'
+    img = Image.open(imgpath)
+    self.photo_background = ImageTk.PhotoImage(img)
+    canvas = Canvas(f_nivoi,width= 850,height =530)
+    canvas.create_image(426,240,image = self.photo_background)
+    canvas.image = self.photo_background
+    canvas.grid(column =1,row=1)
+      
+    myFont = Font(family="Ink Free", size=14)
+    myFontBtn = Font(family="Ink Free", size=12)
+                
+    label = tk.Label(canvas,text='Izaberite tezinu:', font=myFont)   
+    canvas.create_window(626, 100-60,window=label)
+    f_nivoi.rb3 = tk.Radiobutton(canvas,text="najlaksi nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: play(frame))
+    canvas.create_window(626, 130-60,width=150, height=30,window=f_nivoi.rb3)
+    f_nivoi.rb4 = tk.Radiobutton(canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: play(frame))
+    canvas.create_window(626, 165-60,width=150, height=30,window=f_nivoi.rb4)
+    f_nivoi.rb5 = tk.Radiobutton(canvas,text="najtezi nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: play(frame))
+    canvas.create_window(626, 200-60,width=150, height=30,window=f_nivoi.rb5)
+
+def play(f_start):
+    m = MatrixOfButtons(root,f_start,var1,var2,var3)
+    
+def sel(self,f_start):    
     if var1.get()==1:
-        print("1 vs rac")
-        m = MatrixOfButtons(root,f_start,var1,var2,var3)
+        #otvaramo novi frame sa nivoima u kom ce se kada korisnik izabere nivo pokrenuti play
+        nivoi(self,f_start)
     else:
-        print (var1.get())
-        print("1 vs 1")
-        m = MatrixOfButtons(root,f_start,var1,var2,var3)
-
+        play(f_start);
+        
 class MainGUI:
     def __init__(self,master,var1,var2,var3):
         self.f_start = Frame(master)
@@ -410,55 +430,38 @@ class MainGUI:
             def __init__(self,f_start,canvas,var1,var2,var3):
                 self.canvas = canvas
         
-                myFont = Font(family="Courier", size=14)
-                myFontBtn = Font(family="Courier", size=12)
-                
-            
+                myFont = Font(family="Ink Free", size=16)
+                myFontBtn = Font(family="Ink Free", size=14)
+                    
                 f_start.rb1 = tk.Radiobutton(self.canvas, text="1 vs rac", variable=var1, value=1,indicatoron=0,bg='LightCyan2',fg='navy',font=myFontBtn)
-                canvas.create_window(370, 50,width=100, height=30,
+                canvas.create_window(120, 150,width=100, height=30,
                                             window=f_start.rb1)
                 f_start.rb2 = tk.Radiobutton(self.canvas, text="1 vs 1", variable=var1, value=2,indicatoron=0,bg='LightCyan2',fg='navy',font=myFontBtn)
-                canvas.create_window(480, 50,width=100, height=30,
-                                            window=f_start.rb2)
-
-                label = tk.Label(self.canvas,text='Izaberite tezinu:', font=myFont)   
-                canvas.create_window(426, 100,
-                                            window=label)
-                f_start.rb3 = tk.Radiobutton(self.canvas,text="najlaksi nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
-                canvas.create_window(426, 130,width=150, height=30,
-                                            window=f_start.rb3)
-                f_start.rb4 = tk.Radiobutton(self.canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
-                canvas.create_window(426, 165,width=150, height=30,
-                                            window=f_start.rb4)
-                f_start.rb5 = tk.Radiobutton(self.canvas,text="najtezi nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
-                canvas.create_window(426, 200,width=150, height=30,
-                                            window=f_start.rb5)
-                
-                
-                label1 = tk.Label(self.canvas,text='Izaberite velicinu tabele:', font=myFont)   
-                canvas.create_window(426, 245,
-                                            window=label1)
-                f_start.rb6 = tk.Radiobutton(self.canvas,text="4 x 4",variable=var3, value=4,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(426, 275,width=60, height=30,
-                                            window=f_start.rb6)
-                f_start.rb7 = tk.Radiobutton(self.canvas,text="6 x 6",variable=var3, value=6,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(426, 310,width=60, height=30,
-                                            window=f_start.rb7)
-                f_start.rb8 = tk.Radiobutton(self.canvas,text="8 x 8",variable=var3, value=8,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(426, 345,width=60, height=30,
-                                            window=f_start.rb8)
-    
+                canvas.create_window(120, 100,width=100, height=30,window=f_start.rb2)
         
-        imgpath = 'poz1.gif'
+                label1 = tk.Label(self.canvas,text='Izaberite velicinu tabele:', font=myFont)   
+                canvas.create_window(626, 245-180,window=label1)
+
+                f_start.rb6 = tk.Radiobutton(self.canvas,text="4 x 4",variable=var3, value=4,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)#,command=lambda frame=f_start: sel(frame))
+                canvas.create_window(626, 275-180,width=60, height=30,window=f_start.rb6)
+                f_start.rb7 = tk.Radiobutton(self.canvas,text="6 x 6",variable=var3, value=6,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)#,command=lambda frame=f_start: sel(frame))
+                canvas.create_window(626, 310-180,width=60, height=30,window=f_start.rb7)
+                f_start.rb8 = tk.Radiobutton(self.canvas,text="8 x 8",variable=var3, value=8,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(626, 345-180,width=60, height=30,window=f_start.rb8)
+
+                f_start.btn_play = tk.Button(self.canvas, text="Play->",bg='LightCyan2',fg='navy',font=myFontBtn,command=lambda frame=f_start: sel(self,frame))
+                canvas.create_window(626, 200,width=100, height=30,window=f_start.btn_play)
+                
+        
+        imgpath = 'poz_minioni.png'
         img = Image.open(imgpath)
         self.photo_background = ImageTk.PhotoImage(img)
-        canvas = Canvas(self.f_start,width= 852,height =480)
+        canvas = Canvas(self.f_start,width= 850,height =530)
         canvas.create_image(426,240,image = self.photo_background)
         canvas.image = self.photo_background
         canvas.grid(column =1,row=1)
     
         CanvasButton(self.f_start,canvas,var1,var2,var3)
-
 
         raise_frame(self.f_start)
 
