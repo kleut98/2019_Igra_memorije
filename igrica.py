@@ -9,11 +9,6 @@ from pathlib import Path #treba nam za putanje za ucitavanje slika, kao i **
 from tkinter import messagebox
 from PIL import ImageTk,Image
 
-#--KADA UDJEMO U 1vs1 i brzo kliknemo na 3 kartice--treba vrv uraditi neki disable dugmica
-#Treba dodati da izabrane kartice stv budu kartice (a ne bele slike)
-#8x8 i 16x16- nemamo dovoljno kartica
-#dodati mozda u menubar nesto kao zapocni novu igru?
-
 
 #globalne promenljive
 comp_steps = 0
@@ -37,7 +32,7 @@ class MatrixOfButtons:
         #valjda je master root?
         f_start.grid_forget()
         
-        self.frame = Frame(master)
+        self.frame = Frame(master,bg = 'white')
         self.frame.grid(row=1, column=1,sticky="nsew")
         self.n = var3.get()
         if var1.get()==1:
@@ -74,52 +69,61 @@ class MatrixOfButtons:
             self.photo_matrix[pair1[0]][pair1[1]]=path
                 
             if self.n == 4:
-                w = master.winfo_screenwidth()/1.3
-                h = master.winfo_screenheight()/1.3
+                imgpath = 'poz4.jpg'
+                w = 575
+                h= 250
             elif self.n == 6:
-                w = 1000
-                h = 800
+                imgpath = 'poz6.jpg'
+                w = 620
+                h = 290
             else:
-                w = 1200
-                h = 1000
+                imgpath = 'poz8.jpg'
+                w = 610
+                h = 375
             
-            canvas = Canvas(self.frame,width= w,height =h,background = 'turquoise')           
+            
+            
+            img = Image.open(imgpath)
+            self.photo_background = ImageTk.PhotoImage(img)
+            canvas = Canvas(self.frame,width= 1124,height =750)
+            canvas.create_image(562,375,image = self.photo_background)
+            canvas.image = self.photo_background
             canvas.grid(column =1,row=1)
             
             myFont = Font(family="Courier", size=14)
             myFontBtn = Font(family="Courier", size=12)
                 
-            x = 200
-            y = 150
+                
+            self.frameI = Frame(bg = 'white')
             for i in range(0,self.n):
-                x = 200
                 for j in range(0,self.n):
                 
-                    path = os.path.join(Path().absolute(),"slike3/blank.gif")
+                    path = os.path.join(Path().absolute(),"kartice/blank.gif")
                     photo=PhotoImage(file=path)#slika kartica
-                    self.b[i][j] = tk.Button(canvas,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,n=self.n,frame=self.frame,card_photo=photo,f_start=
-                                          f_start,f_nivoi=f_nivoi,var1=var1,var2=var2,var3=var3: self.funkcija(x1,y1,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3)) #***
+                    self.b[i][j] = tk.Button(self.frameI,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,n=self.n,frame=self.frame,card_photo=photo,f_start=
+                                          f_start,f_nivoi=f_nivoi,var1=var1,var2=var2,var3=var3,frameI = self.frameI: self.funkcija(x1,y1,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3,frameI)) #***
                     self.b[i][j].image=photo #*
-                    canvas.create_window(x,y,
-                                        window=self.b[i][j])
-                    x += 100
-                y+=100
+                    self.b[i][j].grid(column = i+1,row =j+1,sticky ='nswe')
             #stavljamo na frame labele koje smo gore definisali 
-            self.lbl = tk.Label(canvas,text="\tIgra  ZUTI igrac",bg='LightCyan2',font=myFont) #prvi na potezu je ZUTI igrac
-            canvas.create_window(50,y+25,window=self.lbl)
-            self.points_yellow = tk.Label(canvas,text = "Zuti: 0",bg='LightCyan2',font=myFont) #labela za bodove ZUTOG igraca
-            canvas.create_window(50,50,window=self.points_yellow)
-            self.points_blue = tk.Label(canvas,text = "Plavi: 0",bg='LightCyan2',font=myFont) #labela za bodove PLAVOG igraca
-            canvas.create_window(x+75,50,window=self.points_blue)
+            self.frameI.lbl = tk.Label(self.frameI,text="\tIgra  ZUTI igrac!",bg='white',font=myFont) #prvi na potezu je ZUTI igrac
+            self.frameI.lbl.grid(column = self.n+1,row =1,sticky ='nswe')
+            self.frameI.points_yellow = tk.Label(self.frameI,text = "Zuti: 0",bg='white',font=myFont) #labela za bodove ZUTOG igraca
+            self.frameI.points_yellow.grid(column = self.n+1,row =2,sticky ='nswe')
+            self.frameI.points_blue = tk.Label(self.frameI,text = "Plavi: 0",bg='white',font=myFont) #labela za bodove PLAVOG igraca
+            self.frameI.points_blue.grid(column = self.n+1,row =self.n,sticky ='nswe')
 
-    def funkcija(self,i,j,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3):
+            canvas.create_window(w, h,window=self.frameI)
+
+
+
+    def funkcija(self,i,j,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3,frameI):
                 global pom_i,pom_j
                 global player
                 global points_b,points_y
                 global nonmatched,opened
                 global done
-                pathf = os.path.join(Path().absolute(),"slike3/zuti.gif")
-                paths = os.path.join(Path().absolute(),"slike3/plavi.gif")
+                pathf = os.path.join(Path().absolute(),"kartice/zuti.gif")
+                paths = os.path.join(Path().absolute(),"kartice/plavi.gif")
                 photo_first = PhotoImage(file=pathf)
                 photo_second = PhotoImage(file=paths)
 
@@ -223,7 +227,7 @@ class MatrixOfButtons:
                     self.b[i2][j2].config(image=photo)
                     self.b[i2][j2].image=photo
                 def change_of_player(self,boja):
-                    self.lbl.configure(text= "\tIgra " + boja + " igrac!")
+                    self.frameI.lbl.configure(text= "\tIgra " + boja + " igrac!")
 
                 def computer_playing(self,frame,photo_second,card_photo):
                     global nonmatched,opened,comp_steps
@@ -253,7 +257,7 @@ class MatrixOfButtons:
                         if pair2 in opened:
                             opened.remove(pair2)
                         points_b += 1
-                        self.points_blue.configure(text = 'Plavi: ' + str(points_b))
+                        self.frameI.points_blue.configure(text = 'Plavi: ' + str(points_b))
                         frame.after(800,lambda: change_random_cards(photo_second,pair1,pair2))
                         frame.after(1200,lambda: computer_playing(self,frame,photo_second,card_photo))
                     else:
@@ -346,14 +350,14 @@ class MatrixOfButtons:
                                 if (pom_i,pom_j) in opened:
                                     opened.remove((pom_i,pom_j))
                                 points_y += 1
-                                self.points_yellow.configure(text ="Zuti: "+ str(points_y))
+                                self.frameI.points_yellow.configure(text ="Zuti: "+ str(points_y))
                                 frame.after(700, lambda: change(photo_first,i,j)) #postavljamo na zute slicice jer su uparene
                             else:
                                 #analogno za plavog
                                 nonmatched.remove((i,j))
                                 nonmatched.remove((pom_i,pom_j))
                                 points_b += 1
-                                self.points_blue.configure(text ="Plavi: "+ str(points_b))
+                                self.frameI.points_blue.configure(text ="Plavi: "+ str(points_b))
                                 frame.after(700, lambda: change(photo_second,i,j))
                         else:
                             frame.after(700, lambda: change(card_photo,i,j)) #vracamo na zatvorene slicice (jer nisu uparene dobro)
@@ -392,8 +396,8 @@ def nivoi(self,f_start,f_nivoi):
     canvas.image = self.photo_background
     canvas.grid(column =1,row=1)
       
-    myFont = Font(family="Ink Free", size=14)
-    myFontBtn = Font(family="Ink Free", size=12)
+    myFont = Font(family="Courier", size=14)
+    myFontBtn = Font(family="Courier", size=12)
                 
     label = tk.Label(canvas,text='Izaberite tezinu:', font=myFont)   
     canvas.create_window(626, 100-60,window=label)
@@ -429,8 +433,8 @@ class MainGUI:
             def __init__(self,f_start,canvas,var1,var2,var3):
                 self.canvas = canvas
         
-                myFont = Font(family="Ink Free", size=16)
-                myFontBtn = Font(family="Ink Free", size=14)
+                myFont = Font(family="Courier", size=16)
+                myFontBtn = Font(family="Courier", size=14)
                     
                 f_start.rb1 = tk.Radiobutton(self.canvas, text="1 vs rac", variable=var1, value=1,indicatoron=0,bg='LightCyan2',fg='navy',font=myFontBtn)
                 canvas.create_window(120, 150,width=100, height=30,
@@ -439,17 +443,17 @@ class MainGUI:
                 canvas.create_window(120, 100,width=100, height=30,window=f_start.rb2)
         
                 label1 = tk.Label(self.canvas,text='Izaberite velicinu tabele:', font=myFont)   
-                canvas.create_window(626, 245-180,window=label1)
+                canvas.create_window(650, 230-180,window=label1)
 
                 f_start.rb6 = tk.Radiobutton(self.canvas,text="4 x 4",variable=var3, value=4,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)#,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(626, 275-180,width=60, height=30,window=f_start.rb6)
+                canvas.create_window(650, 275-180,width=60, height=30,window=f_start.rb6)
                 f_start.rb7 = tk.Radiobutton(self.canvas,text="6 x 6",variable=var3, value=6,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)#,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(626, 310-180,width=60, height=30,window=f_start.rb7)
+                canvas.create_window(650, 310-180,width=60, height=30,window=f_start.rb7)
                 f_start.rb8 = tk.Radiobutton(self.canvas,text="8 x 8",variable=var3, value=8,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
-                canvas.create_window(626, 345-180,width=60, height=30,window=f_start.rb8)
+                canvas.create_window(650, 345-180,width=60, height=30,window=f_start.rb8)
 
                 f_start.btn_play = tk.Button(self.canvas, text="Play->",bg='LightCyan2',fg='navy',font=myFontBtn,command=lambda frame=f_start: sel(self,frame))
-                canvas.create_window(626, 200,width=100, height=30,window=f_start.btn_play)
+                canvas.create_window(650, 200,width=100, height=30,window=f_start.btn_play)
                 
         
         imgpath = 'poz_minioni.png'
@@ -466,10 +470,7 @@ class MainGUI:
 
 
 root = Tk()
-root.title('Memory game')
-#root.configure(background='LightSteelBlue2',cursor='rtl_logo')
-
-#root.geometry('800x500') # Size 800,500
+root.title('memory game')
 
 #MENUBAR
 menubar = Menu(root)
@@ -493,4 +494,3 @@ var3 = IntVar()
 MainGUI(root,var1,var2,var3)
 
 root.mainloop()
-
