@@ -51,7 +51,7 @@ class MatrixOfButtons:
         self.b=[[0 for x in range(0,self.n)] for x in range(0,self.n)] #matrica dugmica
         self.photo_matrix=[[0 for x in range(0,self.n)] for x in range(0,self.n)] #matrica slika
 
-        photo_list=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34] #broj slika
+        photo_list=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32] #broj slika
         list_pair=[] #lista parova=koordinate u matrici (i,j)
         
         for i in range(0,self.n):
@@ -69,7 +69,7 @@ class MatrixOfButtons:
             list_pair.remove(pair1)
 
             #na poziciji (i,j) cuvamo naziv slike
-            path = os.path.join(Path().absolute(),"slike3/"+str(broj_slike)+".gif")
+            path = os.path.join(Path().absolute(),"kartice/"+str(broj_slike)+".png")
             self.photo_matrix[pair[0]][pair[1]]=path
             self.photo_matrix[pair1[0]][pair1[1]]=path
                 
@@ -89,7 +89,6 @@ class MatrixOfButtons:
             myFont = Font(family="Courier", size=14)
             myFontBtn = Font(family="Courier", size=12)
                 
-                
             x = 200
             y = 150
             for i in range(0,self.n):
@@ -107,14 +106,11 @@ class MatrixOfButtons:
                 y+=100
             #stavljamo na frame labele koje smo gore definisali 
             self.lbl = tk.Label(canvas,text="\tIgra  ZUTI igrac",bg='LightCyan2',font=myFont) #prvi na potezu je ZUTI igrac
-            canvas.create_window(50,y+25,
-                                        window=self.lbl)
+            canvas.create_window(50,y+25,window=self.lbl)
             self.points_yellow = tk.Label(canvas,text = "Zuti: 0",bg='LightCyan2',font=myFont) #labela za bodove ZUTOG igraca
-            canvas.create_window(50,50,
-                                        window=self.points_yellow)
+            canvas.create_window(50,50,window=self.points_yellow)
             self.points_blue = tk.Label(canvas,text = "Plavi: 0",bg='LightCyan2',font=myFont) #labela za bodove PLAVOG igraca
-            canvas.create_window(x+75,50,
-                                        window=self.points_blue)
+            canvas.create_window(x+75,50,window=self.points_blue)
 
     def funkcija(self,i,j,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3):
                 global pom_i,pom_j
