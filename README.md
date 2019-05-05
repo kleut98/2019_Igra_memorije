@@ -6,18 +6,24 @@ Kartice se poređaju u m redova po m kartica(m x m). Prvi igrač podiže dve kar
 ## Jezici i tehnologije koje su korišćene u izradi
 Programski jezik: Python3 
 
-Biblioteke: random, pygame
+Biblioteke: random, tkinter, PIL
 ## Pokretanje
-Pokretanje igrice će biti moguće na Linux-u i Windows-u uz instaliranje biblioteke tkinter.  
-Linux instalacija:  
+Pokretanje igrice će biti moguće na Linux-u i Windows-u uz instaliranje biblioteka tkinter i PIL.  
+
+Linux instalacija:
+1) Za tkinter:  
 Otvoriti terminal i pokrenuti narednu komandu:
-  
 `sudo apt-get install python3-tk`   
 
+2) Za PIL:
+
 Windows instalacija:  
+1) Za tkinter:
 Otvoriti command prompt u "Run as Administrator" modu i pokrenuti narednu komandu:   
-  
 `pip install python-tk`
+
+2) Za PIL:
+`pip install Pillow`
 
 ## Autori
 Anja Velicković, kontakt:28anja@live.com  
