@@ -46,73 +46,70 @@ class MatrixOfButtons:
         self.b=[[0 for x in range(0,self.n)] for x in range(0,self.n)] #matrica dugmica
         self.photo_matrix=[[0 for x in range(0,self.n)] for x in range(0,self.n)] #matrica slika
 
+
         photo_list=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32] #broj slika
         list_pair=[] #lista parova=koordinate u matrici (i,j)
-        
+
+        lista=[0 for x in range(0,self.n*self.n)]
+                
+        broj_slike=1
+        for k in range(0,self.n*self.n,2):
+            path = os.path.join(Path().absolute(),"kartice/"+str(broj_slike)+".png")
+            lista[k]=path
+            lista[k+1]=path
+            broj_slike+=1
+            
+        random.shuffle(lista)
+
+        l=0   
         for i in range(0,self.n):
             for j in range(0,self.n):
-                list_pair.append((i,j))
-                self.photo_matrix[i][j]=" " 
-
-        while list_pair!=[]:
-            broj_slike=random.choice(photo_list)
-            photo_list.remove(broj_slike)
+                self.photo_matrix[i][j]=lista[l]
+                l+=1
+  
+        if self.n == 4:
+            imgpath = 'poz4.jpg'
+            w = 575
+            h= 250
+        elif self.n == 6:
+            imgpath = 'poz6.jpg'
+            w = 620
+            h = 290
+        else:
+            imgpath = 'poz8.jpg'
+            w = 610
+            h = 375
+                    
+        img = Image.open(imgpath)
+        self.photo_background = ImageTk.PhotoImage(img)
+        canvas = Canvas(self.frame,width= 1124,height =750)
+        canvas.create_image(562,375,image = self.photo_background)
+        canvas.image = self.photo_background
+        canvas.grid(column =1,row=1)
             
-            pair=random.choice(list_pair)
-            list_pair.remove(pair)
-            pair1=random.choice(list_pair)
-            list_pair.remove(pair1)
-
-            #na poziciji (i,j) cuvamo naziv slike
-            path = os.path.join(Path().absolute(),"kartice/"+str(broj_slike)+".png")
-            self.photo_matrix[pair[0]][pair[1]]=path
-            self.photo_matrix[pair1[0]][pair1[1]]=path
-                
-            if self.n == 4:
-                imgpath = 'poz4.jpg'
-                w = 575
-                h= 250
-            elif self.n == 6:
-                imgpath = 'poz6.jpg'
-                w = 620
-                h = 290
-            else:
-                imgpath = 'poz8.jpg'
-                w = 610
-                h = 375
-            
-            
-            
-            img = Image.open(imgpath)
-            self.photo_background = ImageTk.PhotoImage(img)
-            canvas = Canvas(self.frame,width= 1124,height =750)
-            canvas.create_image(562,375,image = self.photo_background)
-            canvas.image = self.photo_background
-            canvas.grid(column =1,row=1)
-            
-            myFont = Font(family="Courier", size=14)
-            myFontBtn = Font(family="Courier", size=12)
+        myFont = Font(family="Courier", size=14)
+        myFontBtn = Font(family="Courier", size=12)
                 
                 
-            self.frameI = Frame(bg = 'white')
-            for i in range(0,self.n):
-                for j in range(0,self.n):
-                
-                    path = os.path.join(Path().absolute(),"kartice/blank.gif")
-                    photo=PhotoImage(file=path)#slika kartica
-                    self.b[i][j] = tk.Button(self.frameI,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,n=self.n,frame=self.frame,card_photo=photo,f_start=
+        self.frameI = Frame(bg = 'white')
+        for i in range(0,self.n):
+            for j in range(0,self.n):
+               
+                path = os.path.join(Path().absolute(),"kartice/blank.gif")
+                photo=PhotoImage(file=path)#slika kartica
+                self.b[i][j] = tk.Button(self.frameI,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,n=self.n,frame=self.frame,card_photo=photo,f_start=
                                           f_start,f_nivoi=f_nivoi,var1=var1,var2=var2,var3=var3,frameI = self.frameI: self.funkcija(x1,y1,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3,frameI)) #***
-                    self.b[i][j].image=photo #*
-                    self.b[i][j].grid(column = i+1,row =j+1,sticky ='nswe')
+                self.b[i][j].image=photo #*
+                self.b[i][j].grid(column = i+1,row =j+1,sticky ='nswe')
             #stavljamo na frame labele koje smo gore definisali 
-            self.frameI.lbl = tk.Label(self.frameI,text="\tIgra  ZUTI igrac!",bg='white',font=myFont) #prvi na potezu je ZUTI igrac
-            self.frameI.lbl.grid(column = self.n+1,row =1,sticky ='nswe')
-            self.frameI.points_yellow = tk.Label(self.frameI,text = "Zuti: 0",bg='white',font=myFont) #labela za bodove ZUTOG igraca
-            self.frameI.points_yellow.grid(column = self.n+1,row =2,sticky ='nswe')
-            self.frameI.points_blue = tk.Label(self.frameI,text = "Plavi: 0",bg='white',font=myFont) #labela za bodove PLAVOG igraca
-            self.frameI.points_blue.grid(column = self.n+1,row =self.n,sticky ='nswe')
+        self.frameI.lbl = tk.Label(self.frameI,text="\tIgra  ZUTI igrac!",bg='white',font=myFont) #prvi na potezu je ZUTI igrac
+        self.frameI.lbl.grid(column = self.n+1,row =1,sticky ='nswe')
+        self.frameI.points_yellow = tk.Label(self.frameI,text = "Zuti: 0",bg='white',font=myFont) #labela za bodove ZUTOG igraca
+        self.frameI.points_yellow.grid(column = self.n+1,row =2,sticky ='nswe')
+        self.frameI.points_blue = tk.Label(self.frameI,text = "Plavi: 0",bg='white',font=myFont) #labela za bodove PLAVOG igraca
+        self.frameI.points_blue.grid(column = self.n+1,row =self.n,sticky ='nswe')
 
-            canvas.create_window(w, h,window=self.frameI)
+        canvas.create_window(w, h,window=self.frameI)
 
 
 
