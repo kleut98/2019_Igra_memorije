@@ -464,7 +464,7 @@ class MainGUI:
     
         CanvasButton(self.f_start,canvas,var1,var2,var3)
 
-        #raise_frame(self.f_start)
+        raise_frame(self.f_start)
 
 
 root = Tk()
