@@ -18,8 +18,8 @@ pom_j=-1
 player = 1 #redni broj igraca 
 points_b = 0 #poeni PLAVOG igraca
 points_y = 0 #poeni ZUTOG igraca
-nonmatched = [] #lista kartica koje nisu match-ovane ili osvojene
-#sledeca dva para koristimo kod 1 vs rac
+nonmatched = [] #path_list kartica koje nisu match-ovane ili osvojene
+#sledece koristimo kod 1 vs rac:
 pair1 = (-1,-1) 
 pair2 = (-1,-1)
 done = 0
@@ -27,8 +27,8 @@ opened = [] #pamtimo sve kartice koje smo otvorili do nekog trenutka(treba nam z
 
 class MatrixOfButtons:
     #master je root
-    def __init__(self,master,f_start,f_nivoi,var1,var2,var3):
-        #self=root a frame=f_one_player
+    def __init__(self,master,f_start,f_level,var1,var2,var3):
+        #frame=f_one_player
         #valjda je master root?
         f_start.grid_forget()
         
@@ -48,23 +48,23 @@ class MatrixOfButtons:
 
 
         photo_list=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32] #broj slika
-        list_pair=[] #lista parova=koordinate u matrici (i,j)
+        list_pair=[] #path_list parova=koordinate u matrici (i,j)
 
-        lista=[0 for x in range(0,self.n*self.n)]
+        path_list=[0 for x in range(0,self.n*self.n)]
                 
-        broj_slike=1
+        pic_num=1
         for k in range(0,self.n*self.n,2):
-            path = os.path.join(Path().absolute(),"kartice/"+str(broj_slike)+".png")
-            lista[k]=path
-            lista[k+1]=path
-            broj_slike+=1
+            path = os.path.join(Path().absolute(),"kartice/"+str(pic_num)+".png")
+            path_list[k]=path
+            path_list[k+1]=path
+            pic_num+=1
             
-        random.shuffle(lista)
+        random.shuffle(path_list)
 
         l=0   
         for i in range(0,self.n):
             for j in range(0,self.n):
-                self.photo_matrix[i][j]=lista[l]
+                self.photo_matrix[i][j]=path_list[l]
                 l+=1
   
         if self.n == 4:
@@ -97,8 +97,8 @@ class MatrixOfButtons:
                
                 path = os.path.join(Path().absolute(),"kartice/blank.gif")
                 photo=PhotoImage(file=path)#slika kartica
-                self.b[i][j] = tk.Button(self.frameI,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,n=self.n,frame=self.frame,card_photo=photo,f_start=
-                                          f_start,f_nivoi=f_nivoi,var1=var1,var2=var2,var3=var3,frameI = self.frameI: self.funkcija(x1,y1,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3,frameI)) #***
+                self.b[i][j] = tk.Button(self.frameI,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,card_photo=photo,f_start=
+                                          f_start,f_level=f_level,var1=var1,var2=var2,var3=var3,frameI = self.frameI: self.funkcija(x1,y1,card_photo,f_start,f_level,var1,var2,var3,frameI)) #***
                 self.b[i][j].image=photo #*
                 self.b[i][j].grid(column = i+1,row =j+1,sticky ='nswe')
             #stavljamo na frame labele koje smo gore definisali 
@@ -113,7 +113,7 @@ class MatrixOfButtons:
 
 
 
-    def funkcija(self,i,j,n,frame,card_photo,f_start,f_nivoi,var1,var2,var3,frameI):
+    def funkcija(self,i,j,card_photo,f_start,f_level,var1,var2,var3,frameI):
                 global pom_i,pom_j
                 global player
                 global points_b,points_y
@@ -146,7 +146,7 @@ class MatrixOfButtons:
 
                     pair2 = random.choice(nonmatched)
                     (i2,j2) = pair2
-                    frame.after(500, lambda: open_card(self,i2,j2))
+                    self.frame.after(500, lambda: open_card(self,i2,j2))
                     nonmatched.append(pair1) #vracamo pair1 u nonmatched listu
                 
                 def open_random_card(self): #prikazuje random izabranu karticu (1 kartica) i onda trazi njenu istu u opened
@@ -160,12 +160,12 @@ class MatrixOfButtons:
                     opened.remove(pair1) #sklanjamo par pair1 iz opened da bismo videli da li postoji jos neki par sa istom slikom
                     if find_same(self,pair1):
                         (i2,j2) = pair2
-                        frame.after(500, lambda: open_card(self,i2,j2))
+                        self.frame.after(500, lambda: open_card(self,i2,j2))
                     else:
                         nonmatched.remove(pair1)
                         pair2 = random.choice(nonmatched)
                         (i2,j2) = pair2
-                        frame.after(500, lambda: open_card(self,i2,j2))
+                        self.frame.after(500, lambda: open_card(self,i2,j2))
                         nonmatched.append(pair1)
                     opened.append(pair1)
 
@@ -201,7 +201,7 @@ class MatrixOfButtons:
                             (i1,j1) = pair1
                             open_card(self,i1,j1)
                             (i2,j2) = pair2
-                            frame.after(500, lambda: open_card(self,i2,j2))
+                            self.frame.after(500, lambda: open_card(self,i2,j2))
                             return
                         opened.append(pair)
                     open_random_card(self) #ako nije nasao 2 iste u opened,onda otvara dalje po "randomu"
@@ -226,17 +226,17 @@ class MatrixOfButtons:
                 def change_of_player(self,boja):
                     self.frameI.lbl.configure(text= "\tIgra " + boja + " igrac!")
 
-                def computer_playing(self,frame,photo_second,card_photo):
+                def computer_playing(self,photo_second,card_photo):
                     global nonmatched,opened,comp_steps
                     global player
                     global points_b
                     global pair1,pair2
                     global done #sluzi nam da ne ispisemo 2x ko je pobednik na f_end
-                    disable_buttons(self,n)
+                    disable_buttons(self)
                     comp_steps += 1
                             
                     if len(nonmatched) is 0 : 
-                        frame.after(1200,lambda : winner(points_b,points_y,frame))
+                        self.frame.after(1200,lambda : winner(points_b,points_y))
                         done = 1
                         return False
                         
@@ -255,13 +255,13 @@ class MatrixOfButtons:
                             opened.remove(pair2)
                         points_b += 1
                         self.frameI.points_blue.configure(text = 'Plavi: ' + str(points_b))
-                        frame.after(800,lambda: change_random_cards(photo_second,pair1,pair2))
-                        frame.after(1200,lambda: computer_playing(self,frame,photo_second,card_photo))
+                        self.frame.after(800,lambda: change_random_cards(photo_second,pair1,pair2))
+                        self.frame.after(1200,lambda: computer_playing(self,photo_second,card_photo))
                     else:
                         player = 1
-                        frame.after(950, lambda: enable_buttons(self,n))                 
-                        frame.after(900, lambda: change_random_cards(card_photo,pair1,pair2))
-                        frame.after(700, lambda: change_of_player(self,"ZUTI "))
+                        self.frame.after(950, lambda: enable_buttons(self))                 
+                        self.frame.after(900, lambda: change_random_cards(card_photo,pair1,pair2))
+                        self.frame.after(700, lambda: change_of_player(self,"ZUTI "))
                     
 
                 def defaults(): #vracamo sve globalne promenljiive na njihov default
@@ -275,12 +275,12 @@ class MatrixOfButtons:
                     
                     f_start.rb1.deselect()
                     f_start.rb2.deselect()
-                    f_nivoi.rb3.deselect()
-                    f_nivoi.rb4.deselect()
-                    f_nivoi.rb5.deselect()
-                    f_start.rb6.deselect()
-                    f_start.rb7.deselect()
-                    f_start.rb8.deselect()
+                    f_level.rb1.deselect()
+                    f_level.rb2.deselect()
+                    f_level.rb3.deselect()
+                    f_start.rb3.deselect()
+                    f_start.rb4.deselect()
+                    f_start.rb5.deselect()
                     
                     count=0
                     pom_i=-1
@@ -288,7 +288,7 @@ class MatrixOfButtons:
                     player = 1 #redni broj igraca 
                     points_b = 0 #poeni PLAVOG igraca
                     points_y = 0 #poeni ZUTOG igraca
-                    nonmatched = [] #lista kartica koje nisu match-ovane ili osvojene
+                    nonmatched = [] #path_list kartica koje nisu match-ovane ili osvojene
                     #sledeca dva para koristimo kod 1 vs rac
                     pair1 = (-1,-1) 
                     pair2 = (-1,-1)
@@ -296,29 +296,29 @@ class MatrixOfButtons:
                     opened = []
                     comp_steps = 0
                     
-                def disable_buttons(self,n):
-                    for i in range(0,n):
-                        for j in range(0,n):
+                def disable_buttons(self):
+                    for i in range(0,self.n):
+                        for j in range(0,self.n):
                             self.b[i][j].configure(state=DISABLED)
-                def enable_buttons(self,n):
-                    for i in range(0,n):
-                        for j in range(0,n):
+                def enable_buttons(self):
+                    for i in range(0,self.n):
+                        for j in range(0,self.n):
                             self.b[i][j].configure(state=NORMAL)
                     
-                def winner(points_b,points_y,frame):
+                def winner(points_b,points_y):
                     def popup(text): #novi prozor u kom pitamo da li igrac zeli ponovo da igra ili da izadje iz igrice
                         msg=messagebox.askyesno("Qustion",text)
                         if msg==True:
-                            frame.grid_forget()
+                            self.frame.grid_forget()
                             defaults()
                             f_start.rb1.configure(variable=var1, value=1)
                             f_start.rb2.configure(variable=var1, value=2)
-                            f_nivoi.rb3.configure(variable=var2, value=1)
-                            f_nivoi.rb4.configure(variable=var2, value=2)
-                            f_nivoi.rb5.configure(variable=var2, value=3)
-                            f_start.rb6.configure(variable=var3, value=4)
-                            f_start.rb7.configure(variable=var3, value=6)
-                            f_start.rb8.configure(variable=var3, value=8)
+                            f_level.rb1.configure(variable=var2, value=1)
+                            f_level.rb2.configure(variable=var2, value=2)
+                            f_level.rb3.configure(variable=var2, value=3)
+                            f_start.rb3.configure(variable=var3, value=4)
+                            f_start.rb4.configure(variable=var3, value=6)
+                            f_start.rb5.configure(variable=var3, value=8)
                             MainGUI(root,var1,var2,var3)
                         else:
                             exit()
@@ -348,47 +348,47 @@ class MatrixOfButtons:
                                     opened.remove((pom_i,pom_j))
                                 points_y += 1
                                 self.frameI.points_yellow.configure(text ="Zuti: "+ str(points_y))
-                                frame.after(700, lambda: change(photo_first,i,j)) #postavljamo na zute slicice jer su uparene
+                                self.frame.after(700, lambda: change(photo_first,i,j)) #postavljamo na zute slicice jer su uparene
                             else:
                                 #analogno za plavog
                                 nonmatched.remove((i,j))
                                 nonmatched.remove((pom_i,pom_j))
                                 points_b += 1
                                 self.frameI.points_blue.configure(text ="Plavi: "+ str(points_b))
-                                frame.after(700, lambda: change(photo_second,i,j))
+                                self.frame.after(700, lambda: change(photo_second,i,j))
                         else:
-                            frame.after(700, lambda: change(card_photo,i,j)) #vracamo na zatvorene slicice (jer nisu uparene dobro)
-                            disable_buttons(self,n)   
+                            self.frame.after(700, lambda: change(card_photo,i,j)) #vracamo na zatvorene slicice (jer nisu uparene dobro)
+                            disable_buttons(self)   
                             if player == 1:
                                 player = 2 #promenimo ko je na redu da igra
-                                frame.after(700, lambda: change_of_player(self,"PLAVI"))
+                                self.frame.after(700, lambda: change_of_player(self,"PLAVI"))
 
                                 if var1.get() ==1: # u ovo ulazi samo ako smo uzeli opciju 1 vs rac (onda nam je racunar ustvari plavi igrac)
-                                    frame.after(750, lambda: computer_playing(self,frame,photo_second,card_photo))
-                                frame.after(700, lambda: enable_buttons(self,n))                 
+                                    self.frame.after(750, lambda: computer_playing(self,photo_second,card_photo))
+                                self.frame.after(700, lambda: enable_buttons(self))                 
                             else:
                                 player = 1
-                                frame.after(500, lambda: change_of_player(self,"ZUTI "))
-                                frame.after(700, lambda: enable_buttons(self,n))
+                                self.frame.after(500, lambda: change_of_player(self,"ZUTI "))
+                                self.frame.after(700, lambda: enable_buttons(self))
                                 
                     # ako nisu, to znaci da imamo jednu otvorenu i zelimo da zapamtimo njenu poziciju
                     else:
                         pom_i=i
                         pom_j=j  
                 
-                if points_b + points_y == n*n/2 and done==0: #ako je done=1 onda smo presli na f_end u fji computer_playing
-                    frame.after(1200,lambda : winner(points_b,points_y,frame))               
+                if points_b + points_y == self.n*self.n/2 and done==0: #ako je done=1 onda smo presli na f_end u fji computer_playing
+                    self.frame.after(1200,lambda : winner(points_b,points_y))               
           
 def raise_frame(frame):
     frame.tkraise()
     
-def nivoi(self,f_start,f_nivoi):
+def level(self,f_start,f_level):
     f_start.grid_forget()
 
     imgpath = 'nivo_pic.png'
     img = Image.open(imgpath)
     self.photo_background = ImageTk.PhotoImage(img)
-    canvas = Canvas(f_nivoi,width= 850,height =530)
+    canvas = Canvas(f_level,width= 850,height =530)
     canvas.create_image(426,240,image = self.photo_background)
     canvas.image = self.photo_background
     canvas.grid(column =1,row=1)
@@ -398,27 +398,27 @@ def nivoi(self,f_start,f_nivoi):
                 
     label = tk.Label(canvas,text='Izaberite tezinu:', font=myFont)   
     canvas.create_window(626, 100-60,window=label)
-    f_nivoi.rb3 = tk.Radiobutton(canvas,text="najlaksi nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_nivoi: play(frame1,frame2))
-    canvas.create_window(626, 130-60,width=150, height=30,window=f_nivoi.rb3)
-    f_nivoi.rb4 = tk.Radiobutton(canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_nivoi: play(frame1,frame2))
-    canvas.create_window(626, 165-60,width=150, height=30,window=f_nivoi.rb4)
-    f_nivoi.rb5 = tk.Radiobutton(canvas,text="najtezi nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_nivoi: play(frame1,frame2))
-    canvas.create_window(626, 200-60,width=150, height=30,window=f_nivoi.rb5)
+    f_level.rb1 = tk.Radiobutton(canvas,text="najlaksi nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_level: play(frame1,frame2))
+    canvas.create_window(626, 130-60,width=150, height=30,window=f_level.rb1)
+    f_level.rb2 = tk.Radiobutton(canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_level: play(frame1,frame2))
+    canvas.create_window(626, 165-60,width=150, height=30,window=f_level.rb2)
+    f_level.rb3 = tk.Radiobutton(canvas,text="najtezi nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_level: play(frame1,frame2))
+    canvas.create_window(626, 200-60,width=150, height=30,window=f_level.rb3)
 
-def play(f_start,f_nivoi):
-    f_nivoi.grid_forget()
-    m = MatrixOfButtons(root,f_start,f_nivoi,var1,var2,var3)
+def play(f_start,f_level):
+    f_level.grid_forget()
+    m = MatrixOfButtons(root,f_start,f_level,var1,var2,var3)
     
 def sel(self,f_start):
-    f_nivoi = Frame(root)
-    f_nivoi.grid(column =1,row = 1)
+    f_level = Frame(root)
+    f_level.grid(column =1,row = 1)
     if var1.get()==1:
-        #otvaramo novi frame sa nivoima u kom ce se kada korisnik izabere nivo pokrenuti play
-        nivoi(self,f_start,f_nivoi)
+        #otvaramo novi frame sa levelma u kom ce se kada korisnik izabere nivo pokrenuti play
+        level(self,f_start,f_level)
     else:
-        nivoi(self,f_start,f_nivoi)
-        f_nivoi.grid_forget()
-        play(f_start,f_nivoi)
+        level(self,f_start,f_level)
+        f_level.grid_forget()
+        play(f_start,f_level)
         
         
 class MainGUI:
@@ -441,13 +441,14 @@ class MainGUI:
         
                 label1 = tk.Label(self.canvas,text='Izaberite velicinu tabele:', font=myFont)   
                 canvas.create_window(650, 230-180,window=label1)
+                canvas.create_window(650, 230-180,window=label1)
 
-                f_start.rb6 = tk.Radiobutton(self.canvas,text="4 x 4",variable=var3, value=4,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)#,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(650, 275-180,width=60, height=30,window=f_start.rb6)
-                f_start.rb7 = tk.Radiobutton(self.canvas,text="6 x 6",variable=var3, value=6,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)#,command=lambda frame=f_start: sel(frame))
-                canvas.create_window(650, 310-180,width=60, height=30,window=f_start.rb7)
-                f_start.rb8 = tk.Radiobutton(self.canvas,text="8 x 8",variable=var3, value=8,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
-                canvas.create_window(650, 345-180,width=60, height=30,window=f_start.rb8)
+                f_start.rb3 = tk.Radiobutton(self.canvas,text="4 x 4",variable=var3, value=4,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(650, 275-180,width=60, height=30,window=f_start.rb3)
+                f_start.rb4 = tk.Radiobutton(self.canvas,text="6 x 6",variable=var3, value=6,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(650, 310-180,width=60, height=30,window=f_start.rb4)
+                f_start.rb5 = tk.Radiobutton(self.canvas,text="8 x 8",variable=var3, value=8,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(650, 345-180,width=60, height=30,window=f_start.rb5)
 
                 f_start.btn_play = tk.Button(self.canvas, text="Play->",bg='LightCyan2',fg='navy',font=myFontBtn,command=lambda frame=f_start: sel(self,frame))
                 canvas.create_window(650, 200,width=100, height=30,window=f_start.btn_play)
@@ -463,7 +464,7 @@ class MainGUI:
     
         CanvasButton(self.f_start,canvas,var1,var2,var3)
 
-        raise_frame(self.f_start)
+        #raise_frame(self.f_start)
 
 
 root = Tk()
@@ -476,10 +477,10 @@ fileMenu = Menu(menubar)
 helpMenu=Menu(menubar)
 
 def ispisi():
-    text="Ova igrica na na na"
+    text="Korisnik na početku igre bira ukupan broj kartica n = m * m, kao i opciju da li želi da igra protiv računara ili protiv nekog drugog korisnika.\nKartice se poređaju u m redova po m kartica(m x m). Prvi igrač podiže dve kartice i ako su identične – uzima ih sa talona i podiže još dve. Ukoliko kartice nisu iste, na potezu je sledeći igrač. Svako od igrača se trudi da zapamti gde stoji kartica i tako traži par istih. Ovaj postupak se ponavlja naizmenično dok se kartice nalaze na talonu. Pobeđuje igrač koji ima više kartica."
     msg=messagebox.showinfo("O igrici",text)    
 
-helpMenu.add_command(label="Pravila igre",command=ispisi)
+helpMenu.add_command(label="O igrici",command=ispisi)
 fileMenu.add_command(label="Izadji",command=exit)
 menubar.add_cascade(label="File", menu=fileMenu)
 menubar.add_cascade(label="Help", menu=helpMenu)
