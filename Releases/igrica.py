@@ -1,0 +1,485 @@
+from tkinter import *
+import tkinter as tk
+import os #**
+import random
+from tkinter.font import Font
+from pathlib import Path #treba nam za putanje za ucitavanje slika, kao i **
+from tkinter import messagebox
+from PIL import ImageTk,Image
+import sys
+
+
+#globalne promenljive
+count=0
+pom_i=-1
+pom_j=-1
+player = 1 #redni broj igraca 
+points_b = 0 #poeni PLAVOG igraca
+points_y = 0 #poeni ZUTOG igraca
+nonmatched = [] #path_list kartica koje nisu match-ovane ili osvojene
+#sledece koristimo kod 1 vs rac:
+comp_steps = 0
+pair1 = (-1,-1) 
+pair2 = (-1,-1)
+done = 0
+opened = [] #pamtimo sve kartice koje smo otvorili do nekog trenutka(treba nam za igranje racunara)
+CONST_TIME = 700
+class MatrixOfButtons:
+    #master je root
+    def __init__(self,master,f_start,f_level,var1,var2,var3):
+        f_start.grid_forget()
+        
+        self.frame = Frame(master,bg = 'white')
+        self.frame.grid()
+        self.n = var3.get()
+        if var1.get()==1:
+            self.level = var2.get()
+        self.vs = var1.get()
+        #formiramo listu nonmatched:
+        global nonmatched
+        for i in range(0,self.n):
+            for j in range(0,self.n):
+                nonmatched.append((i,j)) 
+
+        self.b=[[0 for x in range(0,self.n)] for x in range(0,self.n)] #matrica dugmica
+        self.photo_matrix=[[0 for x in range(0,self.n)] for x in range(0,self.n)] #matrica slika(path-ova slika)
+
+        path_list=[0 for x in range(0,self.n*self.n)]
+                
+        pic_num=1
+        for k in range(0,self.n*self.n,2):
+            path = os.path.join(Path().absolute(),"kartice/"+str(pic_num)+".png")
+            path_list[k]=path
+            path_list[k+1]=path
+            pic_num+=1
+            
+        random.shuffle(path_list)
+
+        l=0   
+        for i in range(0,self.n):
+            for j in range(0,self.n):
+                self.photo_matrix[i][j]=path_list[l]
+                l+=1
+  
+        if self.n == 4:
+            imgpath = 'poz4.jpg'
+            w = 575
+            h= 250
+        elif self.n == 6:
+            imgpath = 'poz6.jpg'
+            w = 620
+            h = 290
+        else:
+            imgpath = 'poz8.jpg'
+            w = 610
+            h = 375
+                    
+        img = Image.open(imgpath)
+        self.photo_background = ImageTk.PhotoImage(img)
+        canvas = Canvas(self.frame,width= 1124,height =750)
+        canvas.create_image(562,375,image = self.photo_background)
+        canvas.image = self.photo_background
+        canvas.grid()
+            
+        myFont = Font(family="Courier", size=14)
+        myFontBtn = Font(family="Courier", size=12)
+                
+                
+        self.frameI = Frame(bg = 'white')
+        for i in range(0,self.n):
+            for j in range(0,self.n):
+               
+                path = os.path.join(Path().absolute(),"kartice/blank.gif")
+                photo=PhotoImage(file=path)#slika kartica
+                self.b[i][j] = tk.Button(self.frameI,image=photo,bg='LightCyan2',fg='navy',command=lambda x1=i, y1=j,card_photo=photo,f_start=
+                                          f_start,f_level=f_level,var1=var1,var2=var2,var3=var3,frameI = self.frameI: self.function(x1,y1,card_photo,f_start,f_level,var1,var2,var3,frameI)) #***
+                self.b[i][j].image=photo #*
+                self.b[i][j].grid(column = i+1,row =j+1,sticky ='nswe')
+            #stavljamo na frame labele koje smo gore definisali 
+        self.frameI.lbl = tk.Label(self.frameI,text="\tIgra  ŽUTI igrac!",bg='white',font=myFont) #prvi na potezu je ZUTI igrac
+        self.frameI.lbl.grid(column = self.n+1,row =1,sticky ='nswe')
+        self.frameI.points_yellow = tk.Label(self.frameI,text = "Žuti: 0",bg='white',font=myFont) #labela za bodove ZUTOG igraca
+        self.frameI.points_yellow.grid(column = self.n+1,row =2,sticky ='nswe')
+        self.frameI.points_blue = tk.Label(self.frameI,text = "Plavi: 0",bg='white',font=myFont) #labela za bodove PLAVOG igraca
+        self.frameI.points_blue.grid(column = self.n+1,row =self.n,sticky ='nswe')
+
+        canvas.create_window(w, h,window=self.frameI)
+
+
+
+    def function(self,i,j,card_photo,f_start,f_level,var1,var2,var3,frameI):
+                global pom_i,pom_j
+                global player
+                global points_b,points_y
+                global nonmatched,opened
+                global done
+                pathf = os.path.join(Path().absolute(),"kartice/zuti.gif")
+                paths = os.path.join(Path().absolute(),"kartice/plavi.gif")
+                photo_first = PhotoImage(file=pathf)
+                photo_second = PhotoImage(file=paths)
+
+                def open_card(i,j): #prikazuje sta se nalazi na kartici
+
+                    global opened
+                    photo=PhotoImage(file=self.photo_matrix[i][j])
+                    self.b[i][j].config(image=photo)
+                    #moramo ponovo da postavimo sliku zbog sakupljaca otpadaka, jer ga on pokupi u suprotnom*
+                    self.b[i][j].image=photo
+                    if (i,j) not in opened:
+                        opened.append((i,j)) # dodajemo u listu karticu koju smo otvorili, ako ona nije vec u njemu
+
+                def open_random_cards(): #prikazuje random izabrane kartice (2 kartice)
+                    global nonmatched
+                    global pair1,pair2
+                    
+                    #biramo 2 para iz liste neosvojenih(=nonmatched) kartica
+                    pair1 = random.choice(nonmatched)
+                    (i1,j1) = pair1
+                    open_card(i1,j1)
+                    nonmatched.remove(pair1) #sklonili smo ovaj pair1 da bi nam pair2 bio razliciti od pair1, posle cemo ga vratiti
+
+                    pair2 = random.choice(nonmatched)
+                    (i2,j2) = pair2
+                    self.frame.after(500, lambda: open_card(i2,j2))
+                    nonmatched.append(pair1) #vracamo pair1 u nonmatched listu
+                
+                def open_random_card(): #prikazuje random izabranu karticu (1 kartica) i onda trazi njenu istu u opened
+                    global opened,nonmatched
+                    global pair1,pair2
+                    
+                    pair1 = random.choice(nonmatched)
+                    (i1,j1) = pair1
+                    open_card(i1,j1)
+                    
+                    opened.remove(pair1) #sklanjamo par pair1 iz opened da bismo videli da li postoji jos neki par sa istom slikom
+                    if find_same(pair1):
+                        (i2,j2) = pair2
+                        self.frame.after(500, lambda: open_card(i2,j2))
+                    else:
+                        nonmatched.remove(pair1)
+                        pair2 = random.choice(nonmatched)
+                        (i2,j2) = pair2
+                        self.frame.after(500, lambda: open_card(i2,j2))
+                        nonmatched.append(pair1)
+                    opened.append(pair1)
+
+                def conditions():
+                    if (self.level == 1 and self.n ==4 and comp_steps%4==0) or (self.level == 1 and self.n ==6 and comp_steps%6==0) or (self.level == 1 and self.n ==8 and comp_steps%8==0):
+                        return True
+                    elif (self.level == 2 and self.n ==4 and comp_steps%3==0) or (self.level == 2 and self.n ==6 and comp_steps%4==0) or (self.level == 2 and self.n ==8 and comp_steps%5==0):
+                        return True
+                    elif (self.level == 3 and self.n ==4) or (self.level == 3 and self.n ==6 and comp_steps%2==0) or (self.level == 3 and self.n ==8 and comp_steps%2==0):
+                        return True
+                    return False
+                def find_same(pair):
+                    global pair2
+                    global opened
+
+                    (i1,j1)=pair
+                    for (i,j) in opened:
+                        if self.photo_matrix[i1][j1] == self.photo_matrix[i][j]:
+                            pair2 = (i,j)
+                            return True
+                    return False
+            
+
+                def open_same_cards_in_opened():
+                    global opened
+                    global pair1,pair2
+                    
+                
+                    for pair in opened:
+                        opened.remove(pair) #sklanjamo par pair iz opened da bismo videli da li postoji jos neki par sa istom slikom
+                        if find_same(pair):
+                            pair1 = pair
+                            (i1,j1) = pair1
+                            open_card(i1,j1)
+                            (i2,j2) = pair2
+                            self.frame.after(500, lambda: open_card(i2,j2))
+                            return
+                        opened.append(pair)
+                    open_random_card() #ako nije nasao 2 iste u opened,onda otvara dalje po "randomu"
+
+            
+                def change(photo,i,j):
+                    global pom_i,pom_j
+                    self.b[i][j].config(image=photo)
+                    self.b[i][j].image=photo
+                    self.b[pom_i][pom_j].config(image=photo)
+                    self.b[pom_i][pom_j].image=photo
+                    pom_i = -1
+                    pom_j = -1
+                    # vracamo pom_i i pom_j na -1 da nam ne bi doslo do greske pri neparnim koracima
+                def change_random_cards(photo,pair1,pair2) :
+                    (i1,j1) = pair1
+                    (i2,j2) = pair2
+                    self.b[i1][j1].config(image=photo)
+                    self.b[i1][j1].image=photo
+                    self.b[i2][j2].config(image=photo)
+                    self.b[i2][j2].image=photo
+
+                def change_of_player(boja):
+                    self.frameI.lbl.configure(text= "\tIgra " + boja + " igrac!")
+
+                def computer_playing(photo_second,card_photo):
+                    global nonmatched,opened,comp_steps
+                    global player
+                    global points_b
+                    global pair1,pair2
+                    global done #sluzi nam da ne ispisemo 2x ko je pobednik na f_end
+                    disable_buttons()
+                    comp_steps += 1
+                            
+                    if len(nonmatched) is 0 : 
+                        self.frame.after(1200,lambda : winner(points_b,points_y))
+                        done = 1
+                        return False
+                        
+                    if conditions():
+                        open_same_cards_in_opened()
+                    else:
+                        open_random_cards()
+                    (i1,j1) = pair1
+                    (i2,j2) = pair2
+                    if self.photo_matrix[i1][j1]==self.photo_matrix[i2][j2]:
+                        nonmatched.remove(pair1)
+                        nonmatched.remove(pair2)
+                        if pair1 in opened:
+                            opened.remove(pair1)
+                        if pair2 in opened:
+                            opened.remove(pair2)
+                        points_b += 1
+                        self.frameI.points_blue.configure(text = 'Plavi: ' + str(points_b))
+                        self.frame.after(800,lambda: change_random_cards(photo_second,pair1,pair2))
+                        self.frame.after(1200,lambda: computer_playing(photo_second,card_photo))
+                    else:
+                        player = 1
+                        self.frame.after(950, lambda: enable_buttons())                 
+                        self.frame.after(900, lambda: change_random_cards(card_photo,pair1,pair2))
+                        self.frame.after(CONST_TIME, lambda: change_of_player("ŽUTI "))
+                    
+
+                def defaults(): #vracamo sve globalne promenljiive na njihov default
+                    global count
+                    global pom_i,pom_j
+                    global player
+                    global points_b,points_y
+                    global nonmatched,opened,comp_steps
+                    global pair1,pair2
+                    global done
+                    
+                    f_start.rb1.deselect()
+                    f_start.rb2.deselect()
+                    if self.vs == 1:
+                        f_level.rb1.deselect()
+                        f_level.rb2.deselect()
+                        f_level.rb3.deselect()
+                    f_start.rb3.deselect()
+                    f_start.rb4.deselect()
+                    f_start.rb5.deselect()
+                    
+                    count=0
+                    pom_i=-1
+                    pom_j=-1
+                    player = 1 #redni broj igraca 
+                    points_b = 0 #poeni PLAVOG igraca
+                    points_y = 0 #poeni ZUTOG igraca
+                    nonmatched = [] #path_list kartica koje nisu match-ovane ili osvojene
+                    #sledeca dva para koristimo kod 1 vs rac
+                    pair1 = (-1,-1) 
+                    pair2 = (-1,-1)
+                    done = 0
+                    opened = []
+                    comp_steps = 0
+                    
+                def disable_buttons():
+                    for i in range(0,self.n):
+                        for j in range(0,self.n):
+                            self.b[i][j].configure(state=DISABLED)
+                def enable_buttons():
+                    for i in range(0,self.n):
+                        for j in range(0,self.n):
+                            self.b[i][j].configure(state=NORMAL)
+                    
+                def winner(points_b,points_y):
+                    def popup(text): #novi prozor u kom pitamo da li igrac zeli ponovo da igra ili da izadje iz igrice
+                        msg=messagebox.askyesno("Question",text)
+                        if msg==True:
+                            self.frame.grid_forget()
+                            defaults()
+                            f_start.rb1.configure(variable=var1, value=1)
+                            f_start.rb2.configure(variable=var1, value=2)
+                            if self.vs == 1:
+                                f_level.rb1.configure(variable=var2, value=1)
+                                f_level.rb2.configure(variable=var2, value=2)
+                                f_level.rb3.configure(variable=var2, value=3)
+                            f_start.rb3.configure(variable=var3, value=4)
+                            f_start.rb4.configure(variable=var3, value=6)
+                            f_start.rb5.configure(variable=var3, value=8)
+                            MainGUI(root,var1,var2,var3)
+                        else:
+                            sys.exit()
+                    if points_y > points_b:
+                        popup("Pobedio je ŽUTI Igrac!\nIgraj ponovo?")
+                    elif points_y < points_b:
+                        popup("Pobedio je PLAVI Igrac!\nIgraj ponovo?")
+                    else:
+                        popup("Nereseno\nIgraj ponovo?")
+
+                # zapravo program, posle gomile fja :D
+                if (pom_i!=i or pom_j!=j) and ((i,j) in nonmatched): #da ne bi nastao problem ako neko klikne dva puta na isto dugme i ne mozemo ponovo otvarati osvojene kartice
+
+                    global count
+                    count += 1
+                
+                    open_card(i,j)
+                
+                    if count % 2 == 0: #proveravamo da li su otvorene 2 kartice, ako jesu radimo sledece
+                        if self.photo_matrix[i][j]==self.photo_matrix[pom_i][pom_j]: #ako su uparene
+                            if player == 1: #ako je igrao zuti igrac
+                                nonmatched.remove((i,j))
+                                nonmatched.remove((pom_i,pom_j))
+                                if (i,j) in opened:
+                                    opened.remove((i,j))
+                                if (pom_i,pom_j) in opened:
+                                    opened.remove((pom_i,pom_j))
+                                points_y += 1
+                                self.frameI.points_yellow.configure(text ="Žuti: "+ str(points_y))
+                                self.frame.after(CONST_TIME, lambda: change(photo_first,i,j)) #postavljamo na zute slicice jer su uparene
+                            else:
+                                #analogno za plavog
+                                nonmatched.remove((i,j))
+                                nonmatched.remove((pom_i,pom_j))
+                                points_b += 1
+                                self.frameI.points_blue.configure(text ="Plavi: "+ str(points_b))
+                                self.frame.after(CONST_TIME, lambda: change(photo_second,i,j))
+                        else:
+                            self.frame.after(CONST_TIME, lambda: change(card_photo,i,j)) #vracamo na zatvorene slicice (jer nisu uparene dobro)
+                            disable_buttons()   
+                            if player == 1:
+                                player = 2 #promenimo ko je na redu da igra
+                                self.frame.after(CONST_TIME, lambda: change_of_player("PLAVI"))
+
+                                if var1.get() ==1: # u ovo ulazi samo ako smo uzeli opciju 1 vs rac (onda nam je racunar ustvari plavi igrac)
+                                    self.frame.after(750, lambda: computer_playing(photo_second,card_photo))
+                                self.frame.after(CONST_TIME, lambda: enable_buttons())                 
+                            else:
+                                player = 1
+                                self.frame.after(500, lambda: change_of_player("ZUTI "))
+                                self.frame.after(CONST_TIME, lambda: enable_buttons())
+                                
+                    # ako nisu, to znaci da imamo jednu otvorenu i zelimo da zapamtimo njenu poziciju
+                    else:
+                        pom_i=i
+                        pom_j=j  
+                
+                if points_b + points_y == self.n*self.n/2 and done==0: #ako je done=1 onda smo presli na f_end u fji computer_playing
+                    self.frame.after(1200,lambda : winner(points_b,points_y))               
+          
+    
+def level(self,f_start,f_level):
+    f_start.grid_forget()
+
+    imgpath = 'nivo_pic.png'
+    img = Image.open(imgpath)
+    self.photo_background = ImageTk.PhotoImage(img)
+    canvas = Canvas(f_level,width= 850,height =530)
+    canvas.create_image(426,240,image = self.photo_background)
+    canvas.image = self.photo_background
+    canvas.grid()
+      
+    myFont = Font(family="Courier", size=14)
+    myFontBtn = Font(family="Courier", size=12)
+                
+    label = tk.Label(canvas,text='Izaberite težinu:', font=myFont)   
+    canvas.create_window(626, 40,window=label)
+    f_level.rb1 = tk.Radiobutton(canvas,text="najlakši nivo",variable=var2, value=1,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_level: play(frame1,frame2))
+    canvas.create_window(626, 70,width=150, height=30,window=f_level.rb1)
+    f_level.rb2 = tk.Radiobutton(canvas,text="srednji nivo",variable=var2, value=2,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_level: play(frame1,frame2))
+    canvas.create_window(626, 105,width=150, height=30,window=f_level.rb2)
+    f_level.rb3 = tk.Radiobutton(canvas,text="najteži nivo",variable=var2, value=3,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0,command=lambda frame1=f_start,frame2=f_level: play(frame1,frame2))
+    canvas.create_window(626, 140,width=150, height=30,window=f_level.rb3)
+
+def play(f_start,f_level):
+    f_level.grid_forget()
+    m = MatrixOfButtons(root,f_start,f_level,var1,var2,var3)
+    
+def sel(self,f_start):
+    f_level = Frame(root)
+    f_level.grid()
+    if var1.get()==1:
+        #otvaramo novi frame sa levelma u kom ce se kada korisnik izabere nivo pokrenuti play
+        level(self,f_start,f_level)
+    else:
+        play(f_start,f_level)
+        
+        
+class MainGUI:
+    def __init__(self,master,var1,var2,var3):
+        self.f_start = Frame(master)
+        self.f_start.grid()
+        
+        class CanvasButton:
+            def __init__(self,f_start,canvas,var1,var2,var3):
+                self.canvas = canvas
+        
+                myFont = Font(family="Courier", size=16)
+                myFontBtn = Font(family="Courier", size=14)
+                    
+                f_start.rb1 = tk.Radiobutton(self.canvas, text="1 vs rac", variable=var1, value=1,indicatoron=0,bg='LightCyan2',fg='navy',font=myFontBtn)
+                canvas.create_window(120, 150,width=100, height=30,
+                                            window=f_start.rb1)
+                f_start.rb2 = tk.Radiobutton(self.canvas, text="1 vs 1", variable=var1, value=2,indicatoron=0,bg='LightCyan2',fg='navy',font=myFontBtn)
+                canvas.create_window(120, 100,width=100, height=30,window=f_start.rb2)
+        
+                label1 = tk.Label(self.canvas,text='Izaberite veličinu tabele:', font=myFont)   
+                canvas.create_window(650, 50,window=label1)
+                canvas.create_window(650, 50,window=label1)
+
+                f_start.rb3 = tk.Radiobutton(self.canvas,text="4 x 4",variable=var3, value=4,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(650, 95,width=60, height=30,window=f_start.rb3)
+                f_start.rb4 = tk.Radiobutton(self.canvas,text="6 x 6",variable=var3, value=6,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(650, 130,width=60, height=30,window=f_start.rb4)
+                f_start.rb5 = tk.Radiobutton(self.canvas,text="8 x 8",variable=var3, value=8,bg='LightCyan2',fg='navy',font=myFontBtn,indicatoron = 0)
+                canvas.create_window(650, 165,width=60, height=30,window=f_start.rb5)
+
+                f_start.btn_play = tk.Button(self.canvas, text="Play->",bg='LightCyan2',fg='navy',font=myFontBtn,command=lambda frame=f_start: sel(self,frame))
+                canvas.create_window(650, 200,width=100, height=30,window=f_start.btn_play)
+                
+        
+        imgpath = 'poz_minioni.png'
+        img = Image.open(imgpath)
+        self.photo_background = ImageTk.PhotoImage(img)
+        canvas = Canvas(self.f_start,width= 850,height =530)
+        canvas.create_image(426,240,image = self.photo_background)
+        canvas.image = self.photo_background
+        canvas.grid()
+    
+        CanvasButton(self.f_start,canvas,var1,var2,var3)
+
+
+root = Tk()
+root.title('memory game')
+
+#MENUBAR
+menubar = Menu(root)
+root.config(menu=menubar)
+fileMenu = Menu(menubar)
+helpMenu=Menu(menubar)
+
+def ispisi():
+    text="Sa leve strane ekrana nalaze se dugmići pomoću kojih se vrši izbor da li igraju dva igrača ili se igra protiv računara.\nDugmići sa desne strane ekrana služe za odabir veličine table.\nUkoliko odaberete da igrate protiv računara bićete u prilici da izaberete koju od tri navedene težine želite."
+    msg=messagebox.showinfo("O igrici",text)    
+
+helpMenu.add_command(label="O igrici",command=ispisi)
+fileMenu.add_command(label="Izađi",command=sys.exit)
+menubar.add_cascade(label="File", menu=fileMenu)
+menubar.add_cascade(label="Help", menu=helpMenu)
+
+var1 = IntVar()
+var2 = IntVar()
+var3 = IntVar()
+
+MainGUI(root,var1,var2,var3)
+
+root.mainloop()
